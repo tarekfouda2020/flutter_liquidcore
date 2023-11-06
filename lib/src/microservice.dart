@@ -22,14 +22,14 @@ class MicroService {
 
   final Map<String, List<EventListener>> _eventListeners = new Map();
 
-  String _instanceId;
-  String _uri;
+  String? _instanceId;
+  String? _uri;
   bool _isStarted = false;
   bool _hasExit = false;
 
-  OnStartListener _onStartListener;
-  OnErrorListener _onErrorListener;
-  OnExitListener _onExitListener;
+  OnStartListener? _onStartListener;
+  OnErrorListener? _onErrorListener;
+  OnExitListener? _onExitListener;
 
   /// Creates a new MicroService instance.
   /// [uri] The URI (can be a network URL or local file/resource) of the MicroService code.
@@ -42,11 +42,11 @@ class MicroService {
   ///   Raw iOS bundle resource formats:
   ///     - 'Resources/script.js'
   MicroService(String uri,
-      [OnStartListener _onStartListener,
-      OnErrorListener _onErrorListener,
-      OnExitListener _onExitListener]) {
+      [OnStartListener? _onStartListener,
+      OnErrorListener? _onErrorListener,
+      OnExitListener? _onExitListener]) {
     _instanceId = _uuid.v4();
-    _instances[_instanceId] = this;
+    _instances[_instanceId!] = this;
     this._uri = uri;
     this._onStartListener = _onStartListener;
     this._onErrorListener = _onErrorListener;
@@ -55,7 +55,7 @@ class MicroService {
 
   /// Return the current Dart UUID.
   String id() {
-    return _instanceId;
+    return _instanceId!;
   }
 
   /// Start the MicroService.
@@ -67,7 +67,7 @@ class MicroService {
   /// node from a command line. The first two arguments will be the application (node)
   /// followed by the local module code (/home/module/{service.js}. 'argv' arguments
   /// will then be appended in process.argv[2:]
-  Future<void> start([List<String> arguments]) {
+  Future<void> start([List<String>? arguments]) {
     return _invokeMethod("start", {'argv': arguments});
   }
 
@@ -77,7 +77,7 @@ class MicroService {
   Future<void> addEventListener(String event, EventListener listener) {
     var listeners = _eventListeners[event];
     if (listeners == null) {
-      listeners = new List();
+      listeners = [];
       _eventListeners[event] = listeners;
     }
     listeners.add(listener);
@@ -129,7 +129,7 @@ class MicroService {
   }
 
   /// Return the development server.
-  static Future<String> devServer([String filename, int port]) async {
+  static Future<Future> devServer([String? filename, int? port]) async {
     return _methodChannel.invokeMethod("devServer", {
       'filename': filename,
       'port': port,
@@ -146,7 +146,7 @@ class MicroService {
     liquidcoreLog('_platformCallHandler call ${call.method} ${call.arguments}');
     var arguments = (call.arguments as Map);
     String serviceId = arguments['serviceId'] as String;
-    MicroService microService = _instances[serviceId];
+    MicroService? microService = _instances[serviceId];
     if (microService == null) {
       print("MicroService $serviceId was not found!");
       return null;
@@ -159,18 +159,18 @@ class MicroService {
         case 'listener.onStart':
           microService._isStarted = true;
           if (microService._onStartListener != null) {
-            microService._onStartListener(microService);
+            microService._onStartListener!(microService);
           }
           break;
         case 'listener.onError':
           if (microService._onErrorListener != null) {
-            microService._onErrorListener(microService, value);
+            microService._onErrorListener!(microService, value);
           }
           break;
         case 'listener.onExit':
           microService._hasExit = true;
           if (microService._onExitListener != null) {
-            microService._onExitListener(microService, value as int);
+            microService._onExitListener!(microService, value as int);
           }
           break;
         case 'listener.onEvent':

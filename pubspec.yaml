@@ -8,13 +8,9 @@ homepage: https://github.com/j0j00/flutter_liquidcore
 dependencies:
   flutter:
     sdk: flutter
-  uuid: ^2.0.2
+  uuid: any
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_driver:
-    sdk: flutter
 
 flutter:
   plugin:
@@ -22,4 +18,4 @@ flutter:
     pluginClass: LiquidcorePlugin
 
 environment:
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.18.0 <3.0.0"

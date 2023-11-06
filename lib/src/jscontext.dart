@@ -45,16 +45,16 @@ class JSContext {
   final EventChannel _jsContextExceptionChannel =
       const EventChannel("$NAMESPACE/jscontextException");
 
-  StreamSubscription _jsContextExceptionSubscription;
+  StreamSubscription? _jsContextExceptionSubscription;
 
-  ExceptionHandler _exceptionHandler;
+  ExceptionHandler? _exceptionHandler;
 
-  String _instanceId;
+  String? _instanceId;
   var _jsFunctions = new Map<String, Function>();
 
   JSContext() {
     _instanceId = _uuid.v4();
-    _instances[_instanceId] = this;
+    _instances[_instanceId!] = this;
   }
 
   /// Set a property.
@@ -65,7 +65,7 @@ class JSContext {
   /// communication mechanism, it'll be converted to a promise on the Javascript side.
   ///
   /// [attributes] And OR'd list of JSProperty constants.
-  Future<dynamic> setProperty(String prop, dynamic value, [int attributes]) {
+  Future<dynamic> setProperty(String prop, dynamic value, [int? attributes]) {
     var arguments = {
       'prop': prop,
       'value': value,
@@ -117,7 +117,7 @@ class JSContext {
   /// [sourceURL]  The URI of the source file, only used for reporting in stack trace (optional)
   /// [startingLineNumber]  The beginning line number, only used for reporting in stack trace (optional)
   Future<dynamic> evaluateScript(String script,
-      [String sourceURL, int startingLineNumber = 0]) {
+      [String? sourceURL, int startingLineNumber = 0]) {
     return _invokeMethod("evaluateScript", {
       'script': script,
       'sourceURL': sourceURL,
@@ -135,7 +135,7 @@ class JSContext {
       _jsContextExceptionSubscription =
           _jsContextExceptionChannel.receiveBroadcastStream().listen((error) {
         if (_exceptionHandler != null) {
-          _exceptionHandler(error as String);
+          _exceptionHandler!(error as String);
         }
       });
     }
@@ -147,7 +147,7 @@ class JSContext {
   Future<void> clearExceptionHandler() {
     this._exceptionHandler = null;
     if (_jsContextExceptionSubscription != null) {
-      _jsContextExceptionSubscription.cancel();
+      _jsContextExceptionSubscription?.cancel();
       _jsContextExceptionSubscription = null;
     }
 
@@ -182,7 +182,7 @@ class JSContext {
     liquidcoreLog('_platformCallHandler call ${call.method} ${call.arguments}');
     var arguments = (call.arguments as Map);
     String contextId = arguments['contextId'] as String;
-    JSContext instance = _instances[contextId];
+    JSContext? instance = _instances[contextId];
     if (instance == null) {
       liquidcoreLog("jsContext $contextId was not found!");
       return null;
